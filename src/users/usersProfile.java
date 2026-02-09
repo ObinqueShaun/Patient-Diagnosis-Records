@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import start.continue_register;
 
 /**
  *
@@ -24,54 +25,24 @@ public class usersProfile extends javax.swing.JFrame {
      */
     public usersProfile() {
         initComponents();
+        u_continue.setVisible(false);
         loadUserProfile();
     }
-
-    private void loadUserProfile() {
-    int userId = config.Session.userId; // get logged-in user's ID
-
-    if (userId == 0) {
-        System.out.println("No user logged in.");
-        return;
-    }
-
-    String sql = "SELECT u_id, f_name, m_name, l_name, age, sex, email, phone FROM tbl_accounts WHERE u_id=?";
-
-    try (Connection conn = config.connectDB();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
-
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            // Display with field names
-            patient_num.setText("Patient ID: " + rs.getInt("u_id"));
-
-            String f = rs.getString("f_name") != null ? rs.getString("f_name") : "";
-            String m = rs.getString("m_name") != null ? rs.getString("m_name") : "";
-            String l = rs.getString("l_name") != null ? rs.getString("l_name") : "";
-            profile_name1.setText("Name: " + (f + " " + m + " " + l).trim());
-
-            profile_age.setText("Age: " + (rs.getString("age") != null ? rs.getString("age") : "N/A"));
-            profile_sex.setText("Sex: " + (rs.getString("sex") != null ? rs.getString("sex") : "N/A"));
-            profile_email.setText("Email: " + (rs.getString("email") != null ? rs.getString("email") : "N/A"));
-            profile_phone.setText("Phone: " + (rs.getString("phone") != null ? rs.getString("phone") : "N/A"));
-        } else {
-            System.out.println("User not found in database.");
-        }
-
-    } catch (Exception e) {
-        System.out.println("Error loading profile: " + e.getMessage());
-        e.printStackTrace();
-    }
-}
-
-
     
     Color logout_color = new Color(192, 57, 43);
     Color logout_color2 = new Color(255,76,48);
     Color back_color = new Color(51,153,255);
     Color back_color2 = new Color(0,204,204);
+    Color u_continue_color = new Color(46,204,113);
+    Color u_continue_color2 = new Color(22, 160, 133);
+    
+    private String showNA(String value) {
+    if (value == null || value.trim().isEmpty()) {
+        return "N/A";
+    }
+    return value;
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -98,6 +69,8 @@ public class usersProfile extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         profile_email = new javax.swing.JLabel();
         profile_phone = new javax.swing.JLabel();
+        u_continue = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
         user_back = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -211,6 +184,27 @@ public class usersProfile extends javax.swing.JFrame {
         profile_phone.setText("Phone Number:");
         jPanel5.add(profile_phone, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, 300, 40));
 
+        u_continue.setBackground(new java.awt.Color(46, 204, 113));
+        u_continue.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                u_continueMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                u_continueMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                u_continueMouseExited(evt);
+            }
+        });
+        u_continue.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Continue to Register ?");
+        u_continue.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, -1, -1));
+
+        jPanel5.add(u_continue, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 290, 220, 60));
+
         jPanel6.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 70, 650, 370));
 
         user_back.setBackground(new java.awt.Color(51, 153, 255));
@@ -296,9 +290,78 @@ public class usersProfile extends javax.swing.JFrame {
         user_back.setBackground(back_color);
     }//GEN-LAST:event_user_backMouseExited
 
+    private void u_continueMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_u_continueMouseClicked
+        new continue_register(config.Session.userId, this).setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_u_continueMouseClicked
+
+    private void u_continueMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_u_continueMouseEntered
+        u_continue.setBackground(u_continue_color2);
+    }//GEN-LAST:event_u_continueMouseEntered
+
+    private void u_continueMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_u_continueMouseExited
+        u_continue.setBackground(u_continue_color);
+    }//GEN-LAST:event_u_continueMouseExited
+
     /**
      * @param args the command line arguments
      */
+    private void loadUserProfile() {
+
+        config con = new config();
+
+        String sql = "SELECT * FROM tbl_accounts WHERE u_id=?";
+
+        try (Connection conn = config.connectDB();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, config.Session.userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                patient_num.setText("Patient ID: " + rs.getInt("u_id"));
+                
+                String fname = showNA(rs.getString("f_name"));
+                String mname = rs.getString("m_name");
+                String lname = showNA(rs.getString("l_name"));
+
+                String fullName = fname + " "
+                        + (mname == null || mname.trim().isEmpty() ? "" : mname + " ")
+                        + lname;
+                
+                profile_name1.setText("Name: " + fullName);
+                profile_age.setText("Age: " + showNA(rs.getString("age")));
+                profile_sex.setText("Sex: " + showNA(rs.getString("sex")));
+                profile_email.setText("Email: " + showNA(rs.getString("email")));
+                profile_phone.setText("Phone: " + showNA(rs.getString("phone")));
+                
+                boolean incomplete =
+                    rs.getString("age") == null || rs.getString("age").trim().isEmpty() ||
+                    rs.getString("sex") == null || rs.getString("sex").trim().isEmpty() ||
+                    rs.getString("phone") == null || rs.getString("phone").trim().isEmpty(); //||
+                    //rs.getString("m_name") == null || rs.getString("m_name").trim().isEmpty();
+                    
+                u_continue.setVisible(incomplete);
+
+
+            } else {
+                patient_num.setText("Patient ID: N/A");
+                profile_name1.setText("Name: N/A");
+                profile_age.setText("Age: N/A");
+                profile_sex.setText("Sex: N/A");
+                profile_email.setText("Email: N/A");
+                profile_phone.setText("Phone: N/A");
+                
+                u_continue.setVisible(true);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -336,6 +399,7 @@ public class usersProfile extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
@@ -349,6 +413,7 @@ public class usersProfile extends javax.swing.JFrame {
     private javax.swing.JLabel profile_name1;
     private javax.swing.JLabel profile_phone;
     private javax.swing.JLabel profile_sex;
+    private javax.swing.JPanel u_continue;
     private javax.swing.JPanel user_back;
     private javax.swing.JPanel user_logout;
     // End of variables declaration//GEN-END:variables

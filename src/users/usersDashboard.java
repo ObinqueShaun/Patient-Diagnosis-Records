@@ -8,6 +8,7 @@ package users;
 import config.config;
 import java.awt.Color;
 import start.confirm_logout;
+import start.continue_register;
 
 /**
  *
@@ -60,6 +61,10 @@ public class usersDashboard extends javax.swing.JFrame {
         jPanel12 = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
+        appointment = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -126,7 +131,7 @@ public class usersDashboard extends javax.swing.JFrame {
         jLabel5.setText("DIAGNOSIS");
         diagnosis.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 120, 30));
 
-        jPanel1.add(diagnosis, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 200, 140, 170));
+        jPanel1.add(diagnosis, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 110, 140, 170));
 
         logout.setBackground(new java.awt.Color(255, 76, 48));
         logout.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -204,7 +209,7 @@ public class usersDashboard extends javax.swing.JFrame {
         jLabel4.setText("Log Out");
         logout.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 90, 30));
 
-        jPanel1.add(logout, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 200, 140, 170));
+        jPanel1.add(logout, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 360, 140, 170));
 
         profile.setBackground(new java.awt.Color(3, 138, 255));
         profile.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -279,7 +284,46 @@ public class usersDashboard extends javax.swing.JFrame {
         jLabel12.setText("Profile");
         profile.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 90, 30));
 
-        jPanel1.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 200, 140, 170));
+        jPanel1.add(profile, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 110, 140, 170));
+
+        appointment.setBackground(new java.awt.Color(46, 204, 113));
+        appointment.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                appointmentMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                appointmentMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                appointmentMouseExited(evt);
+            }
+        });
+        appointment.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/record.png"))); // NOI18N
+        appointment.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 100, 100));
+
+        jPanel5.setBackground(new java.awt.Color(255, 255, 255));
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 140, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 120, Short.MAX_VALUE)
+        );
+
+        appointment.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 140, 120));
+
+        jLabel13.setFont(new java.awt.Font("Tahoma", 1, 15)); // NOI18N
+        jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel13.setText("APPOINTMENT");
+        appointment.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 120, 30));
+
+        jPanel1.add(appointment, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 110, 140, 170));
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/gradient.png"))); // NOI18N
         jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 70, 1060, 500));
@@ -329,9 +373,110 @@ public class usersDashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_logoutMouseClicked
 
     private void profileMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_profileMouseClicked
-        new usersProfile().setVisible(true);
-        this.dispose();
+        int userId = config.Session.userId;
+
+        String sql = "SELECT * FROM tbl_accounts WHERE u_id=?";
+
+        try (java.sql.Connection conn = config.connectDB();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            java.sql.ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                boolean incomplete =
+                    rs.getString("f_name") == null ||
+                    rs.getString("m_name") == null ||
+                    rs.getString("l_name") == null ||
+                    rs.getString("email") == null ||
+                    rs.getString("phone") == null ||
+                    rs.getString("address") == null ||
+                    rs.getString("occupation") == null ||
+                    rs.getString("age") == null ||
+                    rs.getString("b_date") == null ||
+                    rs.getString("status") == null;
+
+                if (incomplete) {
+
+                    int choice = javax.swing.JOptionPane.showConfirmDialog(
+                        this,
+                        "Your profile is incomplete.\nContinue registration first?",
+                        "Incomplete Profile",
+                        javax.swing.JOptionPane.YES_NO_OPTION
+                    );
+
+                    if (choice == javax.swing.JOptionPane.YES_OPTION) {
+                        new continue_register(userId, this).setVisible(true);
+                        this.setVisible(false);
+                        return;
+                    }
+                }
+
+                // ✅ open profile only AFTER decision
+                new usersProfile().setVisible(true);
+                this.dispose();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_profileMouseClicked
+
+    private void appointmentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentMouseEntered
+        appointment.setBackground(diag_color);
+    }//GEN-LAST:event_appointmentMouseEntered
+
+    private void appointmentMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentMouseExited
+        appointment.setBackground(diag_color2);
+    }//GEN-LAST:event_appointmentMouseExited
+
+    private void appointmentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_appointmentMouseClicked
+        int userId = config.Session.userId;
+
+        String sql = "SELECT * FROM tbl_accounts WHERE u_id=?";
+
+        try (java.sql.Connection conn = config.connectDB();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            java.sql.ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                boolean incomplete =
+                    rs.getString("f_name") == null ||
+                    rs.getString("l_name") == null ||
+                    rs.getString("email") == null ||
+                    rs.getString("phone") == null ||
+                    rs.getString("address") == null ||
+                    rs.getString("occupation") == null ||
+                    rs.getString("age") == null ||
+                    rs.getString("b_date") == null ||
+                    rs.getString("status") == null;
+
+                if (incomplete) {
+                    javax.swing.JOptionPane.showMessageDialog(
+                        this,
+                        "You must complete your profile first before making an appointment.",
+                        "Profile Required",
+                        javax.swing.JOptionPane.WARNING_MESSAGE
+                    );
+
+                    new continue_register(userId, this).setVisible(true);
+                    this.setVisible(false);
+                    return;
+                }
+
+                // ✅ only opens if complete
+                new u_appointment().setVisible(true);
+                this.dispose();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_appointmentMouseClicked
 
     /**
      * @param args the command line arguments
@@ -369,12 +514,15 @@ public class usersDashboard extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel appointment;
     private javax.swing.JPanel diagnosis;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -388,6 +536,7 @@ public class usersDashboard extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel logout;

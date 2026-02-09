@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import net.proteanit.sql.DbUtils;
 
+
 /**
  *
  * @author USER4
@@ -29,6 +30,7 @@ public static class Session {
     public static String fullname;
     public static String lastName;
     public static String role;
+    public static boolean profileChecked = false;
 
     public static void clear() {
         userId = 0;
@@ -36,6 +38,7 @@ public static class Session {
         fullname = null;
         lastName = null;
         role = null;
+        profileChecked = false;
     }
 }
 
@@ -76,7 +79,11 @@ public void addRecord(String sql, Object... values) {
             } else if (values[i] instanceof java.sql.Timestamp) {
                 pstmt.setTimestamp(i + 1, (java.sql.Timestamp) values[i]); // If the value is Timestamp
             } else {
-                pstmt.setString(i + 1, values[i].toString()); // Default to String for other types
+                if(values[i] == null) {
+                    pstmt.setObject(i + 1, null);
+                } else {
+                    pstmt.setString(i + 1, values[i].toString());
+                }
             }
         }
 
